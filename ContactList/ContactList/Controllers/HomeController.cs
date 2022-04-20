@@ -11,6 +11,8 @@ namespace ContactList.Controllers
 {
     public class HomeController : Controller
     {
+        private int i = 0;
+
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -20,6 +22,15 @@ namespace ContactList.Controllers
 
         public IActionResult Index()
         {
+            ViewData["i"] = i;
+            return View();
+        }
+
+        public IActionResult Increment()
+        {
+            throw new InvalidOperationException("Increment is not allowed");
+            i++;
+            ViewData["i"] = i;
             return View();
         }
 
