@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContactList.Data;
 using ContactList.Models;
+using ContactList.Filters;
 
 namespace ContactList.Controllers
 {
@@ -20,6 +21,7 @@ namespace ContactList.Controllers
         }
 
         // GET: ContactList
+        [ServiceFilter(typeof(ExecutionMonitorFilter))]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ContactListEntry.ToListAsync());

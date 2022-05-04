@@ -1,4 +1,12 @@
-﻿@{
+﻿@using ContactList.Services;
+@using ContactList.Configuration;
+@using Microsoft.Extensions.Options;
+
+@inject ITransientService TransientService;
+@inject IScopedService ScopedService;
+@inject IOptions<HostingOptions> Options;
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -8,6 +16,30 @@
         <span>Value of 'i' is: @ViewData["i"]</span>
         <a asp-area="" asp-controller="Home" asp-action="Increment">Increment</a>
     </div>
-    
+
+    <div>
+        <div>Transient Service Identifier: @ViewBag.TransientServiceIdentifier</div>
+        <div>Scoped Service Identifier: @ViewBag.ScopedServiceIdentifier</div>
+        <div>Singleton Service Identifier: @ViewBag.SingletonServiceIdentifier</div>
+    </div>
+
+    <div><hr /></div>
+
+    <div>
+        <div>Transient Service Identifier: @TransientService.Identifier</div>
+        <div>Scoped Service Identifier: @ScopedService.Identifier</div>
+    </div>
+
+    <div><hr /></div>
+
+    <div>
+        <div>Hosting Provider: @ViewBag.HostingProvider</div>
+        <div>Hosting Url: <a href="@ViewBag.HostingUrl">Click Here</a></div>
+        <hr />
+        <div>Or read from view's DI system:</div>
+        <div>Hosting Provider: @Options.Value.ProviderName</div>
+        <div>Hosting Url: <a href="@Options.Value.DeployUrl">Click Here</a></div>
+    </div>
+
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

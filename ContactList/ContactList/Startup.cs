@@ -10,6 +10,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ContactList.Data;
+using ContactList.Services;
+using ContactList.Configuration;
+using ContactList.Filters;
 
 namespace ContactList
 {
@@ -29,9 +32,23 @@ namespace ContactList
 
             services.AddDbContext<DatabaseContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("DatabaseContext")));
-            
-            // setup our services
 
+            services.Configure<HostingOptions>(
+                Configuration.GetSection("Hosting"));
+
+            // setup our services
+            services.AddTransient<ITransientService, TransientService>();
+            services.AddScoped<IScopedService, ScopedService>();
+            services.AddSingleton<ISingletonService, SingletonService>();
+            services.AddTransient<ExecutionMonitorFilter>();
+
+            /*
+            // Uncomment if you want to register the filter globally
+            services.AddMvc(options =>
+            {
+                options.Filters.AddService<ExecutionMonitorFilter>();
+            });
+            */
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
