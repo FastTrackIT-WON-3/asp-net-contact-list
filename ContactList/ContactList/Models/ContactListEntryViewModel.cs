@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ContactList.Core.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContactList.Models
 {
-    public class ContactListEntry
+    public class ContactListEntryViewModel
     {
         public int Id { get; set; }
 

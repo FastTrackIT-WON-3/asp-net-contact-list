@@ -1,18 +1,15 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using ContactList.Data;
-using ContactList.Services;
 using ContactList.Configuration;
 using ContactList.Filters;
+using ContactList.Infrastructure;
+using ContactList.Core.Repositories;
+using ContactList.Infrastructure.Repositories;
+using ContactList.Core.Services;
 
 namespace ContactList
 {
@@ -37,9 +34,9 @@ namespace ContactList
                 Configuration.GetSection("Hosting"));
 
             // setup our services
-            services.AddTransient<ITransientService, TransientService>();
-            services.AddScoped<IScopedService, ScopedService>();
-            services.AddSingleton<ISingletonService, SingletonService>();
+            services.AddTransient<IContactListRepository, ContactListRepository>();
+            services.AddTransient<IContactListService, ContactListService>();
+
             services.AddTransient<ExecutionMonitorFilter>();
 
             /*

@@ -1,30 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ContactList.Data;
 using ContactList.Models;
 using ContactList.Filters;
+using ContactList.Core.Services;
+using ContactList.Extensions;
+using ContactList.Core.Exceptions;
 
 namespace ContactList.Controllers
 {
     public class ContactListController : Controller
     {
-        private readonly DatabaseContext _context;
+        private readonly IContactListService _contactListService;
 
-        public ContactListController(DatabaseContext context)
+        public ContactListController(IContactListService contactListService)
         {
-            _context = context;
+            _contactListService = contactListService;
         }
 
         // GET: ContactList
         [ServiceFilter(typeof(ExecutionMonitorFilter))]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ContactListEntry.ToListAsync());
+            var contactListEntries = await _contactListService.GetAllAsync();
+
+            var viewModels = contactListEntries.Select(c => c.ToViewModel())
+                                               .ToList();
+
+            return View(viewModels);
         }
 
         // GET: ContactList/Details/5
@@ -35,14 +38,14 @@ namespace ContactList.Controllers
                 return NotFound();
             }
 
-            var contactListEntry = await _context.ContactListEntry
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var contactListEntry = await _contactListService.GetByIdAsync(id.Value);
             if (contactListEntry == null)
             {
                 return NotFound();
             }
 
-            return View(contactListEntry);
+            var viewModel = contactListEntry.ToViewModel();
+            return View(viewModel);
         }
 
         // GET: ContactList/Create
@@ -57,15 +60,15 @@ namespace ContactList.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("Id,ContactType,Name,DateOfBirth,Address,PhoneNumber,Email")] ContactListEntry contactListEntry)
+            [Bind("Id,ContactType,Name,DateOfBirth,Address,PhoneNumber,Email")] ContactListEntryViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(contactListEntry);
-                await _context.SaveChangesAsync();
+                await _contactListService.CreateAsync(viewModel.ToContactListEntry());
                 return RedirectToAction(nameof(Index));
             }
-            return View(contactListEntry);
+
+            return View(viewModel);
         }
 
         // GET: ContactList/Edit/5
@@ -76,12 +79,14 @@ namespace ContactList.Controllers
                 return NotFound();
             }
 
-            var contactListEntry = await _context.ContactListEntry.FindAsync(id);
+            var contactListEntry = await _contactListService.GetByIdAsync(id.Value);
             if (contactListEntry == null)
             {
                 return NotFound();
             }
-            return View(contactListEntry);
+
+            var viewModel = contactListEntry.ToViewModel();
+            return View(viewModel);
         }
 
         // POST: ContactList/Edit/5
@@ -89,9 +94,11 @@ namespace ContactList.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ContactType,Name,DateOfBirth,Address,PhoneNumber,Email")] ContactListEntry contactListEntry)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,ContactType,Name,DateOfBirth,Address,PhoneNumber,Email")] ContactListEntryViewModel viewModel)
         {
-            if (id != contactListEntry.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
@@ -100,23 +107,21 @@ namespace ContactList.Controllers
             {
                 try
                 {
-                    _context.Update(contactListEntry);
-                    await _context.SaveChangesAsync();
+                    await _contactListService.UpdateAsync(id, viewModel.ToContactListEntry());
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (EntryDoesNotExistException)
                 {
-                    if (!ContactListEntryExists(contactListEntry.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
+                catch (EntryUpdateErrorException)
+                {
+                    throw;
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(contactListEntry);
+
+            return View(viewModel);
         }
 
         // GET: ContactList/Delete/5
@@ -127,14 +132,14 @@ namespace ContactList.Controllers
                 return NotFound();
             }
 
-            var contactListEntry = await _context.ContactListEntry
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var contactListEntry = await _contactListService.GetByIdAsync(id.Value);
             if (contactListEntry == null)
             {
                 return NotFound();
             }
 
-            return View(contactListEntry);
+            var viewModel = contactListEntry.ToViewModel();
+            return View(viewModel);
         }
 
         // POST: ContactList/Delete/5
@@ -142,15 +147,8 @@ namespace ContactList.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contactListEntry = await _context.ContactListEntry.FindAsync(id);
-            _context.ContactListEntry.Remove(contactListEntry);
-            await _context.SaveChangesAsync();
+            await _contactListService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ContactListEntryExists(int id)
-        {
-            return _context.ContactListEntry.Any(e => e.Id == id);
         }
     }
 }

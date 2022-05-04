@@ -1,9 +1,5 @@
-﻿@using ContactList.Services;
-@using ContactList.Configuration;
+﻿@using ContactList.Configuration;
 @using Microsoft.Extensions.Options;
-
-@inject ITransientService TransientService;
-@inject IScopedService ScopedService;
 @inject IOptions<HostingOptions> Options;
 
 @{
@@ -12,25 +8,6 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <div>
-        <span>Value of 'i' is: @ViewData["i"]</span>
-        <a asp-area="" asp-controller="Home" asp-action="Increment">Increment</a>
-    </div>
-
-    <div>
-        <div>Transient Service Identifier: @ViewBag.TransientServiceIdentifier</div>
-        <div>Scoped Service Identifier: @ViewBag.ScopedServiceIdentifier</div>
-        <div>Singleton Service Identifier: @ViewBag.SingletonServiceIdentifier</div>
-    </div>
-
-    <div><hr /></div>
-
-    <div>
-        <div>Transient Service Identifier: @TransientService.Identifier</div>
-        <div>Scoped Service Identifier: @ScopedService.Identifier</div>
-    </div>
-
-    <div><hr /></div>
 
     <div>
         <div>Hosting Provider: @ViewBag.HostingProvider</div>

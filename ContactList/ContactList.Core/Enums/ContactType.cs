@@ -1,4 +1,4 @@
-﻿namespace ContactList.Models
+﻿namespace ContactList.Core.Enums
 {
     public enum ContactType
     {
